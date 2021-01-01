@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
-using System.Linq;
 
-namespace Exposed.servico
+namespace Exposed.Core
 {
     class Orfaos
     {
@@ -25,7 +26,7 @@ namespace Exposed.servico
         }
 
     }
-    class Metodos
+    class Servico
     {
         public List<FileInfo> buscaCsproj(string caminho)
         {
@@ -48,13 +49,13 @@ namespace Exposed.servico
             List<string> lstExt = extensoes.Split(',').ToList();
 
 
-            foreach(var csp in lstcsproj)
+            foreach (var csp in lstcsproj)
             {
                 DirectoryInfo dirCsproj = new DirectoryInfo(csp.DirectoryName);
 
-                foreach(string v in lstExt)
+                foreach (string v in lstExt)
                 {
-                    foreach(FileInfo f in dirCsproj.GetFiles(v, SearchOption.AllDirectories))
+                    foreach (FileInfo f in dirCsproj.GetFiles(v, SearchOption.AllDirectories))
                     {
                         Orfaos arquivo = new Orfaos();
                         string arq = f.FullName.Replace(csp.DirectoryName, "");
@@ -64,7 +65,7 @@ namespace Exposed.servico
                         arquivo.projeto = csproj;
 
                         lstOrfao.Add(arquivo);
-                        
+
                     }
                 }
             }

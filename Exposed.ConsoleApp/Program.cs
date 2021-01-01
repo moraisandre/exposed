@@ -10,6 +10,10 @@ namespace Exposed
     {
         static void Main(string[] args)
         {
+            string caminho = args[0];
+            string extensoes = args[1];
+
+
         }
     }
 }
