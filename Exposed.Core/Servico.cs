@@ -73,48 +73,50 @@ namespace Exposed.Core
 
             return lstOrfao;
         }
-        public List<Orfaos> percorreProj(List<FileInfo> csproj, List<Orfaos> arquivos)
+        public List<Orfaos> percorreProj(List<FileInfo> csproj, List<Orfaos> arquivos, List<string> extensoes)
         {
             List<Orfaos> lstComparacao = new List<Orfaos>();
             List<Orfaos> lstOraos = new List<Orfaos>();
 
 
-            foreach (var file in csproj)
-            {
-
-                FileStream arq = new FileStream(file.FullName, FileMode.Create);
-                XmlReader xread = XmlReader.Create(arq);
-
-                string projeto = string.Empty;
-                string arquivo = string.Empty;
-
-                //List<String> find = new List<string>();
-
-                while (xread.Read())
+            foreach (string ext in extensoes)
+            { 
+                foreach (var file in csproj)
                 {
-                    if ((xread.Name == "Compile") && (xread.NodeType == XmlNodeType.Element))
-                    {
-                        Orfaos orf = new Orfaos();
 
-                        orf.arquivo = xread.GetAttribute("Include");
-                        orf.projeto = xread.ReadInnerXml();
+                    FileStream arq = new FileStream(file.FullName, FileMode.Create);
+                    XmlReader xread = XmlReader.Create(arq);
 
-                        lstComparacao.Add(orf);
-                    }
-                    if ((xread.Name == "Content") && (xread.NodeType == XmlNodeType.Element))
-                    {
-                        Orfaos orf = new Orfaos();
+                    string projeto = string.Empty;
+                    string arquivo = string.Empty;
 
-                        orf.arquivo = xread.GetAttribute("Include");
-                        orf.projeto = xread.ReadInnerXml();
+                    //List<String> find = new List<string>();
 
-                        lstComparacao.Add(orf);
-                    }
+                        while (xread.Read())
+                        {
+                            if ((xread.Name == "Compile") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
+                            {
+                                Orfaos orf = new Orfaos();
+
+                                orf.arquivo = xread.GetAttribute("Include");
+                                orf.projeto = xread.ReadInnerXml();
+
+                                lstComparacao.Add(orf);
+                            }
+                            if ((xread.Name == "Content") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
+                            {
+                                Orfaos orf = new Orfaos();
+
+                                orf.arquivo = xread.GetAttribute("Include");
+                                orf.projeto = xread.ReadInnerXml();
+
+                                lstComparacao.Add(orf);
+                            }
+
+                        }
 
                 }
-
             }
-
 
             return null;
         }
