@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
 
@@ -10,77 +7,55 @@ namespace Exposed.Core
 {
     class Orfaos
     {
-        //private string arquivo;
-        //private string projeto;
-
-        public string arquivo
+        public string Arquivo
         {
-            get { return arquivo; }
-            set { arquivo = value; }
+            get { return Arquivo; }
+            set { Arquivo = value; }
         }
 
-        public string projeto
+        public string Projeto
         {
-            get { return projeto; }
-            set { projeto = value; }
+            get { return Projeto; }
+            set { Projeto = value; }
         }
 
     }
     class Servico
     {
-        public List<FileInfo> buscaCsproj(string caminho)
+        public List<FileInfo> ListaCSProj(string caminho)
         {
-            DirectoryInfo dirCaminho = new DirectoryInfo(caminho);
-            List<FileInfo> lstCsproj = new List<FileInfo>();
-
-
-            foreach (FileInfo file in dirCaminho.GetFiles("*.csproj"))
-            {
-                lstCsproj.Add(file);
-            }
-
-            return lstCsproj;
+            return new DirectoryInfo(caminho).GetFiles("*.csproj").ToList();
         }
 
-        public List<Orfaos> percorreArquivos(string caminho, string extensoes)
+        public List<Orfaos> ObtemArquivosOrfaos(string caminho, string extensoes)
         {
-            List<Orfaos> lstOrfao = new List<Orfaos>();
-            var lstcsproj = buscaCsproj(caminho);
-            List<string> lstExt = extensoes.Split(',').ToList();
+            var arquivosOrfaos = new List<Orfaos>();
 
-
-            foreach (var csp in lstcsproj)
+            ListaCSProj(caminho).ForEach(file =>
             {
-                DirectoryInfo dirCsproj = new DirectoryInfo(csp.DirectoryName);
-
-                foreach (string v in lstExt)
+                extensoes.Split(',').ToList().ForEach(ext =>
                 {
-                    foreach (FileInfo f in dirCsproj.GetFiles(v, SearchOption.AllDirectories))
+                    new DirectoryInfo(file.DirectoryName).GetFiles(ext, SearchOption.AllDirectories).ToList().ForEach(fileInfo =>
                     {
-                        Orfaos arquivo = new Orfaos();
-                        string arq = f.FullName.Replace(csp.DirectoryName, "");
-                        string csproj = csp.Name.Replace(".csproj", "");
+                        arquivosOrfaos.Add(new Orfaos
+                        {
+                            Arquivo = fileInfo.FullName.Replace(file.DirectoryName, ""),
+                            Projeto = file.Name.Replace(".csproj", "")
+                        });
+                    });
+                });
+            });
 
-                        arquivo.arquivo = arq;
-                        arquivo.projeto = csproj;
-
-                        lstOrfao.Add(arquivo);
-
-                    }
-                }
-            }
-
-
-            return lstOrfao;
+            return arquivosOrfaos;
         }
-        public List<Orfaos> percorreProj(List<FileInfo> csproj, List<Orfaos> arquivos, List<string> extensoes)
+
+        public List<Orfaos> PercorreProj(List<FileInfo> csproj, List<Orfaos> arquivos, List<string> extensoes)
         {
             List<Orfaos> lstComparacao = new List<Orfaos>();
             List<Orfaos> lstOraos = new List<Orfaos>();
 
-
             foreach (string ext in extensoes)
-            { 
+            {
                 foreach (var file in csproj)
                 {
 
@@ -92,28 +67,19 @@ namespace Exposed.Core
 
                     //List<String> find = new List<string>();
 
-                        while (xread.Read())
+                    while (xread.Read())
+                    {
+                        if ((xread.Name == "Compile") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
                         {
-                            if ((xread.Name == "Compile") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
+                            Orfaos orf = new Orfaos
                             {
-                                Orfaos orf = new Orfaos();
+                                Arquivo = xread.GetAttribute("Include"),
+                                Projeto = xread.ReadInnerXml()
+                            };
 
-                                orf.arquivo = xread.GetAttribute("Include");
-                                orf.projeto = xread.ReadInnerXml();
-
-                                lstComparacao.Add(orf);
-                            }
-                            if ((xread.Name == "Content") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
-                            {
-                                Orfaos orf = new Orfaos();
-
-                                orf.arquivo = xread.GetAttribute("Include");
-                                orf.projeto = xread.ReadInnerXml();
-
-                                lstComparacao.Add(orf);
-                            }
-
+                            lstComparacao.Add(orf);
                         }
+                    }
 
                 }
             }
