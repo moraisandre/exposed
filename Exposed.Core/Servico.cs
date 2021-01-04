@@ -69,7 +69,7 @@ namespace Exposed.Core
 
                     while (xread.Read())
                     {
-                        if ((xread.Name == "Compile") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
+                        if ((xread.Name == "Compile" || xread.Name == "Content") && (xread.NodeType == XmlNodeType.Element) && xread.GetAttribute("Include").Contains(ext))
                         {
                             Orfaos orf = new Orfaos
                             {
